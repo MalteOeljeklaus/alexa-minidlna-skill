@@ -1,0 +1,4 @@
+domain: mylocaldevice.minidlna
+port: 8200
+root_xml_url: /rootDesc.xml
+similarity_threshold: 0.8
