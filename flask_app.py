@@ -63,4 +63,4 @@ def stop():
 
 
 if __name__ == '__main__':
-    app.run(port=2097, debug=True)
+    app.run(host='0.0.0.0', port='2097', debug=True)
