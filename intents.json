@@ -1,0 +1,87 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "ready media",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": [
+                        "Stop"
+                    ]
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.LoopOffIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.LoopOnIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.PauseIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.RepeatIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ResumeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": [
+                        "Stop"
+                    ]
+                },
+                {
+                    "name": "SearchIntent",
+                    "samples": []
+                },
+                {
+                    "name": "SelectionIntent",
+                    "samples": []
+                },
+                {
+                    "name": "SearchImmediatelyIntent",
+                    "slots": [
+                        {
+                            "name": "artist",
+                            "type": "AMAZON.SearchQuery"
+                        },
+                        {
+                            "name": "title",
+                            "type": "AMAZON.SearchQuery"
+                        }                        
+                    ],
+                    "samples": [
+                        "spiele {title} von {artist}"
+                    ]
+                },
+                {
+                    "name": "PlaylistIntent",
+                    "slots": [],
+                    "samples": []
+                },
+                {
+                    "name": "NextSongIntent",
+                    "slots": [],
+                    "samples": []
+                },
+                {
+                    "name": "PrevSongIntent",
+                    "slots": [],
+                    "samples": []
+                }
+            ],
+            "types": [
+                {}
+            ]
+        }
+    }
+}
