@@ -1,4 +1,3 @@
-domain: mylocaldevice.minidlna
-port: 8200
-root_xml_url: /rootDesc.xml
+substitute_domain: mylocaldevice.minidlna
+root_xml_url: http://192.168.0.2:8200/rootDesc.xml
 similarity_threshold: 0.8

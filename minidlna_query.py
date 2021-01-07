@@ -12,7 +12,7 @@ class MinidlnaQueryHelper:
         self.config = yaml.safe_load(open('./config.yml'))
         for i in range(1,4):
             try:
-                self.upnpdev = upnpclient.Device('http://' + self.config['domain'] + ':' + str(self.config['port']) + self.config['root_xml_url'])
+                self.upnpdev = upnpclient.Device(self.config['root_xml_url'])
                 break
             except Exception as err:
                 print(err.__doc__)
@@ -67,4 +67,9 @@ class MinidlnaQueryHelper:
             return -3, '', '', ''
         matched_title = list(titles.keys())[idx_max]
         title_url = titles[matched_title]
+        url_parts = title_url.split('/')
+        port = url_parts[2].split(':')[1]
+        url_parts[2] = self.config['substitute_domain']+ ':' + port
+        title_url = '/'.join(url_parts)
         return 0, matched_title, matched_artist, title_url
+
