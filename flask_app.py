@@ -6,7 +6,9 @@ from flask import Flask
 from ask_sdk_core.skill_builder import SkillBuilder
 from flask_ask_sdk.skill_adapter import SkillAdapter
 
-from ask_sdk_core.utils import is_intent_name
+from ask_sdk_core.utils import is_intent_name, is_request_type
+
+from ask_sdk_model.ui import SimpleCard
 
 app = Flask(__name__)
 
@@ -29,11 +31,14 @@ logging.info('invocation name is set to {}'.format(invocation_name))
 templates = yaml.safe_load(open('./templates.yml'))
 
 # Register your intent handlers to the skill_builder object
-    
-@sb.request_handler(can_handle_func=is_request_type("LaunchRequest"))
+ 
+@skill_builder.request_handler(can_handle_func=is_request_type("LaunchRequest"))
 def launch_request_handler(handler_input):
+#@skill_builder.request_handler(can_handle_func=is_intent_name("LaunchNativeAppIntent"))
+#def launch_intent_handler(handler_input):
     """Handler for Skill Launch."""
     # type: (HandlerInput) -> Response
+    logging.debug('LaunchRequest()')
     speech_text = templates['welcome']
 
     return handler_input.response_builder.speak(speech_text).set_card(
@@ -64,8 +69,10 @@ def help_intent_handler(handler_input):
 skill_adapter = SkillAdapter(
     skill=skill_builder.create(), skill_id='amzn1.ask.skill.7e368f9d-5d94-435a-9e7a-7cb44e9638f4', app=app)
 
-@app.route("/")
+#@app.route("/")
+@app.route("/", methods=['POST'])
 def invoke_skill():
+    logging.debug('invoke_skill()')
     return skill_adapter.dispatch_request()
 
 if __name__ == '__main__':
