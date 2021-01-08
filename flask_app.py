@@ -1,67 +1,73 @@
-# -*- coding: utf-8 -*-
 import logging
-from flask import Flask, render_template
-from flask_ask import Ask, statement, question, session, audio, current_stream
-#import subprocess
-#import json
-from minidlna_query import MinidlnaQueryHelper
+import yaml, json
+
+from flask import Flask
+
+from ask_sdk_core.skill_builder import SkillBuilder
+from flask_ask_sdk.skill_adapter import SkillAdapter
+
+from ask_sdk_core.utils import is_intent_name
+
 app = Flask(__name__)
-ask = Ask(app, "/")
-logging.getLogger("flask_ask").setLevel(logging.DEBUG)
 
-query = MinidlnaQueryHelper()
+skill_builder = SkillBuilder()
 
-@ask.launch
-def welcome():
-    welcome_msg = render_template('welcome')
-    return question(welcome_msg)
+config = yaml.safe_load(open('./config.yml'))
 
-###################################################################
-#                                                                 #  
-#   "Alexa, öffne ReadyMedia und spiele Bon Voyage von Deichkind  #
-#                                                                 # 
-###################################################################   
+log_level = logging.DEBUG if 'log_level' not in config.keys() else config['log_level']
+logging.getLogger().setLevel(log_level)
+logger = logging.getLogger(__name__)
+logger.setLevel(log_level)
 
-@ask.intent("SearchImmediatelyIntent", convert={'artist': str, 'title': str})
-def search_immediately_term(artist, title):
-    audio().stop()
-    status, matched_title, matched_artist, title_url = query.query_artist_title(artist, title)
-    if status==0:
-        return play_song(title_url)
-    else:
-        return -1
+if 'invocation_name' in config.keys():
+    invocation_name = config['invocation_name']
+else:
+    with open('intents.json','r') as f:
+        invocation_name = json.loads(f.read())['interactionModel']['languageModel']['invocationName']
+logging.info('invocation name is set to {}'.format(invocation_name))
 
-###################################################################################
-#                                                                                 #
-#   Spiele Song ab (Helper Function)                                              #
-#                                                                                 #
-###################################################################################
+templates = yaml.safe_load(open('./templates.yml'))
 
-def play_song(uri):
-#    response = subprocess.Popen(["youtube-dl", uri, "-j"], stdout=subprocess.PIPE)
-#    raw = json.loads(response.stdout.read())
-#    source = ''
-#    for format in raw['formats']:
-#        if format['ext'] == 'mp4':
-#            source = format['url']
-    return audio().play(uri)
+# Register your intent handlers to the skill_builder object
+    
+@sb.request_handler(can_handle_func=is_request_type("LaunchRequest"))
+def launch_request_handler(handler_input):
+    """Handler for Skill Launch."""
+    # type: (HandlerInput) -> Response
+    speech_text = templates['welcome']
 
+    return handler_input.response_builder.speak(speech_text).set_card(
+        SimpleCard(invocation_name, speech_text)).set_should_end_session(
+        False).response
 
-@ask.intent('AMAZON.PauseIntent')
-def pause():
-    return audio().stop()
+@skill_builder.request_handler(
+    can_handle_func=lambda handler_input:
+        is_intent_name("AMAZON.CancelIntent")(handler_input) or
+        is_intent_name("AMAZON.StopIntent")(handler_input))
+def cancel_and_stop_intent_handler(handler_input):
+    """Single handler for Cancel and Stop Intent."""
+    # type: (HandlerInput) -> Response
+    speech_text = templates['stop']
 
+    return handler_input.response_builder.speak(speech_text).set_card(
+        SimpleCard(invocation_name, speech_text)).response
 
-@ask.intent('AMAZON.ResumeIntent')
-def resume():
-    return audio().resume()
+@skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.HelpIntent"))
+def help_intent_handler(handler_input):
+    """Handler for Help Intent."""
+    # type: (HandlerInput) -> Response
+    speech_text = templates['help']
 
+    return handler_input.response_builder.speak(speech_text).ask(
+        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
 
-@ask.intent('AMAZON.StopIntent')
-def stop():
-    return audio().clear_queue(stop=True)
+skill_adapter = SkillAdapter(
+    skill=skill_builder.create(), skill_id='amzn1.ask.skill.7e368f9d-5d94-435a-9e7a-7cb44e9638f4', app=app)
 
+@app.route("/")
+def invoke_skill():
+    return skill_adapter.dispatch_request()
 
 if __name__ == '__main__':
-#    app.run(host='0.0.0.0', port='2097', debug=True) # ipv4
-    app.run(host='::', port='2097', debug=True) # ipv6
+#    app.run(host='0.0.0.0', port='443', ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True) # ipv4
+    app.run(host='::', port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True) # ipv6
