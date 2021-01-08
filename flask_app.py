@@ -66,6 +66,24 @@ def help_intent_handler(handler_input):
     return handler_input.response_builder.speak(speech_text).ask(
         speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
 
+@skill_builder.request_handler(can_handle_func=is_intent_name("SearchImmediatelyIntent"))
+def search_immediately_intent_handler(handler_input):
+    """Handler for Help Intent."""
+    # type: (HandlerInput) -> Response
+#    print(dir(handler_input.request_envelope.request.intent.slots['title'].value))
+#    print(type(handler_input.request_envelope.request.intent.slots['title'].value))
+#    print(handler_input.request_envelope.request.intent.slots['title'].value)
+#    print(handler_input.request_envelope['request']['intent']['slots'])
+
+    title = handler_input.request_envelope.request.intent.slots['title'].value
+    artist = handler_input.request_envelope.request.intent.slots['artist'].value
+
+    logging.debug('SearchImmediatelyIntent(): title='+title+', artist='+artist)
+    speech_text = 'test'
+
+    return handler_input.response_builder.speak(speech_text).ask(
+        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
 skill_adapter = SkillAdapter(
     skill=skill_builder.create(), skill_id='amzn1.ask.skill.7e368f9d-5d94-435a-9e7a-7cb44e9638f4', app=app)
 
