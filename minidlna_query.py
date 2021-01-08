@@ -61,10 +61,12 @@ class MinidlnaQueryHelper:
         artist_id = artists[matched_artist]
         titlelist_id = self.__get_object_children(artist_id)['- All Albums -']
         titles = self.__get_object_url(titlelist_id)
+        if len(titles)<=0:
+            return -3, '', '', ''
         similarities = [self.__string_similarity(title.lower(), t.lower()) for t in titles.keys()]
         idx_max, simil_max = max(enumerate(similarities), key=itemgetter(1))
         if simil_max<=self.config['similarity_threshold']:
-            return -3, '', '', ''
+            return -4, '', '', ''
         matched_title = list(titles.keys())[idx_max]
         title_url = titles[matched_title]
         url_parts = title_url.split('/')

@@ -10,6 +10,8 @@ from ask_sdk_core.utils import is_intent_name, is_request_type
 
 from ask_sdk_model.ui import SimpleCard
 
+from minidlna_query import MinidlnaQueryHelper
+
 app = Flask(__name__)
 
 skill_builder = SkillBuilder()
@@ -29,6 +31,8 @@ else:
 logging.info('invocation name is set to {}'.format(invocation_name))
 
 templates = yaml.safe_load(open('./templates.yml'))
+
+query = MinidlnaQueryHelper()
 
 # Register your intent handlers to the skill_builder object
  
@@ -70,16 +74,53 @@ def help_intent_handler(handler_input):
 def search_immediately_intent_handler(handler_input):
     """Handler for Help Intent."""
     # type: (HandlerInput) -> Response
-#    print(dir(handler_input.request_envelope.request.intent.slots['title'].value))
-#    print(type(handler_input.request_envelope.request.intent.slots['title'].value))
-#    print(handler_input.request_envelope.request.intent.slots['title'].value)
-#    print(handler_input.request_envelope['request']['intent']['slots'])
 
     title = handler_input.request_envelope.request.intent.slots['title'].value
     artist = handler_input.request_envelope.request.intent.slots['artist'].value
 
-    logging.debug('SearchImmediatelyIntent(): title='+title+', artist='+artist)
-    speech_text = 'test'
+    if title==None or title == '':
+        speech_text = templates['title_not_provided']
+
+        return handler_input.response_builder.speak(speech_text).ask(
+            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
+    if artist==None or artist == '':
+        speech_text = templates['artist_not_provided']
+
+        return handler_input.response_builder.speak(speech_text).ask(
+            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
+    logging.debug('SearchImmediatelyIntent(): title='+str(title)+', artist='+str(artist))
+    status, matched_title, matched_artist, title_url = query.query_artist_title(artist, title)
+
+    if status == -1:
+        speech_text = templates['artist_list_empty']
+
+        return handler_input.response_builder.speak(speech_text).ask(
+            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
+    if status == -2:
+        speech_text = templates['artist_not_found']
+
+        return handler_input.response_builder.speak(speech_text).ask(
+            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
+    if status == -3:
+        speech_text = templates['title_list_empty']
+
+        return handler_input.response_builder.speak(speech_text).ask(
+            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
+    if status == -4:
+        speech_text = templates['title_not_found']
+
+        return handler_input.response_builder.speak(speech_text).ask(
+            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
+    assert status == 0
+
+    speech_text = 'song gefunden!'
+    logging.debug('SearchImmediatelyIntent(): matched_title='+str(matchedtitle)+', matched_artist='+str(matchedartist)+', url='+str(title_url))
 
     return handler_input.response_builder.speak(speech_text).ask(
         speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
@@ -94,5 +135,5 @@ def invoke_skill():
     return skill_adapter.dispatch_request()
 
 if __name__ == '__main__':
-#    app.run(host='0.0.0.0', port='443', ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True) # ipv4
+#    app.run(host='0.0.0.0', port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True) # ipv4
     app.run(host='::', port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True) # ipv6
