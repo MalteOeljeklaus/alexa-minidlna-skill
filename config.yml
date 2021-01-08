@@ -6,3 +6,4 @@ port: 443 # amazon wants the endpoint to be accessible via port 443, change this
 ssl_private_key: private-key.pem
 ssl_certificate: certificate.pem
 log_level: 10 # logging.DEBUG=10
+skill_id: <your_skill_id> # find your skill id in the alexa development console

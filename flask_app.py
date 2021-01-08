@@ -67,7 +67,7 @@ def help_intent_handler(handler_input):
         speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
 
 skill_adapter = SkillAdapter(
-    skill=skill_builder.create(), skill_id='amzn1.ask.skill.7e368f9d-5d94-435a-9e7a-7cb44e9638f4', app=app)
+    skill=skill_builder.create(), skill_id=config['skill_id'], app=app)
 
 #@app.route("/")
 @app.route("/", methods=['POST'])
