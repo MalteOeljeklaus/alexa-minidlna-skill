@@ -120,7 +120,7 @@ def search_immediately_intent_handler(handler_input):
     assert status == 0
 
     speech_text = 'song gefunden!'
-    logging.debug('SearchImmediatelyIntent(): matched_title='+str(matchedtitle)+', matched_artist='+str(matchedartist)+', url='+str(title_url))
+    logging.debug('SearchImmediatelyIntent(): matched_title='+str(matched_title)+', matched_artist='+str(matched_artist)+', url='+str(title_url))
 
     return handler_input.response_builder.speak(speech_text).ask(
         speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
