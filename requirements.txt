@@ -2,4 +2,5 @@ upnpclient
 pyyaml
 #flask
 #flask-ask==0.8.8
+#ask-sdk
 flask-ask-sdk

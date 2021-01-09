@@ -1,6 +1,7 @@
 #invocation_name: ready media # if commented, invocation name is read from intents.json
 substitute_domain: mylocaldevice.minidlna
 root_xml_url: http://192.168.0.2:8200/rootDesc.xml
+endpoint_domain: your_endpoint_domain.com
 similarity_threshold: 0.8
 port: 443 # amazon wants the endpoint to be accessible via port 443, change this only if you have a good reason, for example when using a web proxy
 ssl_private_key: private-key.pem

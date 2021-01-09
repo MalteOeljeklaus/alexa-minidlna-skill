@@ -1,7 +1,7 @@
 import logging
 import yaml, json
 
-from flask import Flask
+from flask import Flask, Response
 
 from ask_sdk_core.skill_builder import SkillBuilder
 from flask_ask_sdk.skill_adapter import SkillAdapter
@@ -131,11 +131,11 @@ def search_immediately_intent_handler(handler_input):
                     play_behavior=PlayBehavior.REPLACE_ALL,
                     audio_item=AudioItem(
                         stream=Stream(
-                            token='http://drogensong.de/dr.mp3',
-                            url='http://drogensong.de/dr.mp3',
+                            token='https://'+config['endpoint_domain']+'/playlist.m3u',
+                            url='https://'+config['endpoint_domain']+'/playlist.m3u',
                             offset_in_milliseconds=0,
                             expected_previous_token=None),
-                        metadata=add_screen_background(card_data) if card_data else None
+                        metadata=None
                     )
                 )
             ).set_should_end_session(True).response
@@ -148,6 +148,13 @@ skill_adapter = SkillAdapter(
 def invoke_skill():
     logging.debug('invoke_skill()')
     return skill_adapter.dispatch_request()
+
+@app.route("/playlist.m3u", methods=['GET'])
+def get_playlist():
+    logging.debug('get_playlist()')
+    return Response('#EXTINF:-1, test\nhttp://drogensong.de/dr.mp3', mimetype='audio/x-mpegurl')
+
+
 
 if __name__ == '__main__':
 #    app.run(host='0.0.0.0', port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True) # ipv4
