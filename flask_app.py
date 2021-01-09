@@ -10,7 +10,7 @@ from ask_sdk_core.utils import is_intent_name, is_request_type
 
 from ask_sdk_model.ui import SimpleCard
 
-from alexa import util
+from ask_sdk_model.interfaces.audioplayer import (PlayDirective, PlayBehavior, AudioItem, Stream)
 
 from minidlna_query import MinidlnaQueryHelper
 
@@ -126,10 +126,19 @@ def search_immediately_intent_handler(handler_input):
 
 #    return handler_input.response_builder.speak(speech_text).ask(
 #        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
-    return util.play(
-            url='http://drogensong.de/dr.mp3', offset=0,
-            text=None, card_data=util.audio_data(request)["card"],
-            response_builder=handler_input.response_builder)
+    return handler_input.response_builder.add_directive(
+                PlayDirective(
+                    play_behavior=PlayBehavior.REPLACE_ALL,
+                    audio_item=AudioItem(
+                        stream=Stream(
+                            token='http://drogensong.de/dr.mp3',
+                            url='http://drogensong.de/dr.mp3',
+                            offset_in_milliseconds=0,
+                            expected_previous_token=None),
+                        metadata=add_screen_background(card_data) if card_data else None
+                    )
+                )
+            ).set_should_end_session(True).response
 
 skill_adapter = SkillAdapter(
     skill=skill_builder.create(), skill_id=config['skill_id'], app=app)
