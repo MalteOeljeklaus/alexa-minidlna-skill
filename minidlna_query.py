@@ -69,9 +69,9 @@ class MinidlnaQueryHelper:
             return -4, '', '', ''
         matched_title = list(titles.keys())[idx_max]
         title_url = titles[matched_title]
-        url_parts = title_url.split('/')
-        port = url_parts[2].split(':')[1]
-        url_parts[2] = self.config['substitute_domain']+ ':' + port
-        title_url = '/'.join(url_parts)
+#        url_parts = title_url.split('/')
+#        port = url_parts[2].split(':')[1]
+#        url_parts[2] = self.config['substitute_domain']+ ':' + port
+#        title_url = '/'.join(url_parts)
         return 0, matched_title, matched_artist, title_url
 

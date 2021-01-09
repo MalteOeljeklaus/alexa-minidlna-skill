@@ -128,6 +128,8 @@ def search_immediately_intent_handler(handler_input):
 #    speech_text = 'song gefunden!'
     logging.debug('SearchImmediatelyIntent(): matched_title='+str(matched_title)+', matched_artist='+str(matched_artist)+', url='+str(title_url))
     url = title_url
+#    url = 'http://drogensong.de/dr.mp3'
+#    url='http://192.168.0.2:8200/MediaItems/2343.mp3'
 
 #    return handler_input.response_builder.speak(speech_text).ask(
 #        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
