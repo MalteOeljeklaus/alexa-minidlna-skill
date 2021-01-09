@@ -36,6 +36,8 @@ templates = yaml.safe_load(open('./templates.yml'))
 
 query = MinidlnaQueryHelper()
 
+url = 'https://www.musicscreen.org/MP3-OGG/Jingles/Tesla-Jingle.mp3' # initial url
+
 # Register your intent handlers to the skill_builder object
  
 @skill_builder.request_handler(can_handle_func=is_request_type("LaunchRequest"))
@@ -76,6 +78,8 @@ def help_intent_handler(handler_input):
 def search_immediately_intent_handler(handler_input):
     """Handler for Help Intent."""
     # type: (HandlerInput) -> Response
+
+    global url
 
     title = handler_input.request_envelope.request.intent.slots['title'].value
     artist = handler_input.request_envelope.request.intent.slots['artist'].value
@@ -123,6 +127,7 @@ def search_immediately_intent_handler(handler_input):
 
 #    speech_text = 'song gefunden!'
     logging.debug('SearchImmediatelyIntent(): matched_title='+str(matched_title)+', matched_artist='+str(matched_artist)+', url='+str(title_url))
+    url = title_url
 
 #    return handler_input.response_builder.speak(speech_text).ask(
 #        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
@@ -152,7 +157,7 @@ def invoke_skill():
 @app.route("/playlist.m3u", methods=['GET'])
 def get_playlist():
     logging.debug('get_playlist()')
-    return Response('#EXTINF:-1, test\nhttp://drogensong.de/dr.mp3', mimetype='audio/x-mpegurl')
+    return Response('#EXTINF:-1, test\n'+url, mimetype='audio/x-mpegurl')
 
 
 
