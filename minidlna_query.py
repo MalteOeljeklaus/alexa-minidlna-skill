@@ -1,6 +1,6 @@
-import upnpclient
+import logging, yaml, upnpclient
 from xml.dom.minidom import parseString
-import yaml
+#import yaml
 
 from difflib import SequenceMatcher
 from operator import itemgetter
@@ -25,7 +25,7 @@ class MinidlnaQueryHelper:
 
     def __get_object_children(self, ObjectID):
         ret = {}
-        directo = parseString(self.upnpdev.ContentDirectory.Browse(ObjectID=str(ObjectID),BrowseFlag='BrowseDirectChildren',Filter='*',StartingIndex='0',RequestedCount='999',SortCriteria='+dc:title')['Result'])
+        directo = parseString(self.upnpdev.ContentDirectory.Browse(ObjectID=str(ObjectID),BrowseFlag='BrowseDirectChildren',Filter='*',StartingIndex='0',RequestedCount='0',SortCriteria='+dc:title')['Result'])
         for c in directo.documentElement.childNodes[1:]:
             title = c.childNodes[0].childNodes[0].data
             id = c.attributes._attrs['id'].childNodes[0].data
@@ -34,7 +34,7 @@ class MinidlnaQueryHelper:
     
     def __get_object_url(self, ObjectID):
         ret = {}
-        directo = parseString(self.upnpdev.ContentDirectory.Browse(ObjectID=str(ObjectID),BrowseFlag='BrowseDirectChildren',Filter='*',StartingIndex='0',RequestedCount='999',SortCriteria='+dc:title')['Result'])
+        directo = parseString(self.upnpdev.ContentDirectory.Browse(ObjectID=str(ObjectID),BrowseFlag='BrowseDirectChildren',Filter='*',StartingIndex='0',RequestedCount='0',SortCriteria='+dc:title')['Result'])
         for c in directo.documentElement.childNodes[1:]:
             title = c.childNodes[0].childNodes[0].data
             url = None
@@ -55,6 +55,8 @@ class MinidlnaQueryHelper:
             return -1, '', '', ''
         similarities = [self.__string_similarity(artist.lower(), k.lower()) for k in artists.keys()]
         idx_max, simil_max = max(enumerate(similarities), key=itemgetter(1))
+#        print('\n\n\n'+str(list(artists.keys()))+'\n\n\n')
+        logging.info('best matching artist is: ' + str(list(artists.keys())[idx_max]))       
         if simil_max<=self.config['similarity_threshold']:
             return -2, '', '', ''
         matched_artist = list(artists.keys())[idx_max]
@@ -69,9 +71,5 @@ class MinidlnaQueryHelper:
             return -4, '', '', ''
         matched_title = list(titles.keys())[idx_max]
         title_url = titles[matched_title]
-#        url_parts = title_url.split('/')
-#        port = url_parts[2].split(':')[1]
-#        url_parts[2] = self.config['substitute_domain']+ ':' + port
-#        title_url = '/'.join(url_parts)
         return 0, matched_title, matched_artist, title_url
 
