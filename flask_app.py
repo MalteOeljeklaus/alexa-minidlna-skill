@@ -54,22 +54,43 @@ def launch_request_handler(handler_input):
         SimpleCard(invocation_name, speech_text)).set_should_end_session(
         False).response
 
+@skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.NavigateHomeIntent"))
+def navigate_home_intent_handler(handler_input):
+    """Handler for Pause Intent."""
+    # type: (HandlerInput) -> Response
+    logging.debug('navigate_home_intent_handler() called')
+    speech_text = templates['not_yet_implemented']
+
+    return handler_input.response_builder.speak(speech_text).ask(
+        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
+@skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.PauseIntent"))
+def pause_intent_handler(handler_input):
+    """Handler for Pause Intent."""
+    # type: (HandlerInput) -> Response
+    logging.debug('pause_intent_handler() called')
+    speech_text = templates['not_yet_implemented']
+
+    return handler_input.response_builder.speak(speech_text).ask(
+        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
+@skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.ResumeIntent"))
+def resume_intent_handler(handler_input):
+    """Handler for Resume Intent."""
+    # type: (HandlerInput) -> Response
+    logging.debug('resume_intent_handler() called')
+    speech_text = templates['not_yet_implemented']
+
+    return handler_input.response_builder.speak(speech_text).ask(
+        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+
 @skill_builder.request_handler(
     can_handle_func=lambda handler_input:
         is_intent_name("AMAZON.CancelIntent")(handler_input) or
         is_intent_name("AMAZON.StopIntent")(handler_input))
 def cancel_and_stop_intent_handler(handler_input):
     """Single handler for Cancel and Stop Intent."""
-    # type: (HandlerInput) -> Response
-#    speech_text = templates['stop']
-
-#    return handler_input.response_builder.speak(speech_text).set_card(
-#        SimpleCard(invocation_name, speech_text)).response
-
-#    response_builder.add_directive(StopDirective()).set_should_end_session(True).response
-#    if text:
-#        response_builder.speak(text)
-
+    logging.debug('CancelOrStopIntent() called')
     return handler_input.response_builder.add_directive(StopDirective()).set_should_end_session(True).response
 
 @skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.HelpIntent"))
@@ -138,8 +159,6 @@ def get_playlist():
         return Response('#EXTINF:-1, test\nhttps://www.musicscreen.org/MP3-OGG/Jingles/Tesla-Jingle.mp3', mimetype='audio/x-mpegurl')
     else:
         return Response('#EXTINF:-1, test\n'+playlist_string, mimetype='audio/x-mpegurl')
-
-
 
 if __name__ == '__main__':
     app.run(host=config['bind_ip_address'], port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True)
