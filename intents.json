@@ -4,34 +4,18 @@
             "invocationName": "ready media",
             "intents": [
                 {
-                    "name": "AMAZON.CancelIntent",
-                    "samples": [
-                        "Stop"
-                    ]
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
                 },
                 {
                     "name": "AMAZON.HelpIntent",
                     "samples": []
                 },
                 {
-                    "name": "AMAZON.LoopOffIntent",
-                    "samples": []
-                },
-                {
-                    "name": "AMAZON.LoopOnIntent",
-                    "samples": []
-                },
-                {
-                    "name": "AMAZON.PauseIntent",
-                    "samples": []
-                },
-                {
-                    "name": "AMAZON.RepeatIntent",
-                    "samples": []
-                },
-                {
-                    "name": "AMAZON.ResumeIntent",
-                    "samples": []
+                    "name": "AMAZON.CancelIntent",
+                    "samples": [
+                        "Abbrechen"
+                    ]
                 },
                 {
                     "name": "AMAZON.StopIntent",
@@ -40,47 +24,46 @@
                     ]
                 },
                 {
-                    "name": "SearchIntent",
-                    "samples": []
-                },
-                {
-                    "name": "SelectionIntent",
-                    "samples": []
-                },
-                {
-                    "name": "SearchImmediatelyIntent",
+                    "name": "SearchTitleArtistIntent",
                     "slots": [
                         {
                             "name": "artist",
-                            "type": "AMAZON.SearchQuery"
+                            "type": "searchstring"
                         },
                         {
                             "name": "title",
-                            "type": "AMAZON.SearchQuery"
-                        }                        
+                            "type": "searchstring"
+                        }
                     ],
                     "samples": [
                         "spiele {title} von {artist}"
                     ]
                 },
                 {
-                    "name": "PlaylistIntent",
-                    "slots": [],
+                    "name": "AMAZON.PauseIntent",
                     "samples": []
                 },
                 {
-                    "name": "NextSongIntent",
-                    "slots": [],
-                    "samples": []
-                },
-                {
-                    "name": "PrevSongIntent",
-                    "slots": [],
+                    "name": "AMAZON.ResumeIntent",
                     "samples": []
                 }
             ],
             "types": [
-                {}
+                {
+                    "name": "searchstring",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "Die Aerzte"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "prince"
+                            }
+                        }
+                    ]
+                }
             ]
         }
     }

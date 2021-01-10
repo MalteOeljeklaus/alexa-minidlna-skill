@@ -1,45 +1,46 @@
-import logging
-import yaml, json
+import logging, yaml, json
 
 from flask import Flask, Response
 
 from ask_sdk_core.skill_builder import SkillBuilder
 from flask_ask_sdk.skill_adapter import SkillAdapter
-
 from ask_sdk_core.utils import is_intent_name, is_request_type
-
 from ask_sdk_model.ui import SimpleCard
-
 from ask_sdk_model.interfaces.audioplayer import (PlayDirective, PlayBehavior, AudioItem, Stream)
 
 from minidlna_query import MinidlnaQueryHelper
 
-app = Flask(__name__)
+# define global variables
+playlist_string = None 
+invocation_name = None
 
-skill_builder = SkillBuilder()
+def set_log_level(log_level):
+    # set the log level globally for this script and other modules (flask, upnp)
+    logging.getLogger().setLevel(log_level)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(log_level)
+
+def load_invocation_name():
+    # read the invocation name either from the config.yml file or from the alexa interaction model in intents.json
+    global invocation_name
+    if 'invocation_name' in config.keys():
+        invocation_name = config['invocation_name']
+    else:
+        with open('intents.json','r') as f:
+            invocation_name = json.loads(f.read())['interactionModel']['languageModel']['invocationName']
+    logging.info('invocation name is set to {}'.format(invocation_name))
 
 config = yaml.safe_load(open('./config.yml'))
-
-log_level = logging.DEBUG if 'log_level' not in config.keys() else config['log_level']
-logging.getLogger().setLevel(log_level)
-logger = logging.getLogger(__name__)
-logger.setLevel(log_level)
-
-if 'invocation_name' in config.keys():
-    invocation_name = config['invocation_name']
-else:
-    with open('intents.json','r') as f:
-        invocation_name = json.loads(f.read())['interactionModel']['languageModel']['invocationName']
-logging.info('invocation name is set to {}'.format(invocation_name))
+set_log_level(logging.DEBUG if 'log_level' not in config.keys() else config['log_level'])
+logging.info('Alexa skill endpoint for dlna player was launched')
 
 templates = yaml.safe_load(open('./templates.yml'))
-
+app = Flask(__name__)
+skill_builder = SkillBuilder()
 query = MinidlnaQueryHelper()
 
-url = 'https://www.musicscreen.org/MP3-OGG/Jingles/Tesla-Jingle.mp3' # initial url
+### Register your intent handlers to the skill_builder object
 
-# Register your intent handlers to the skill_builder object
- 
 @skill_builder.request_handler(can_handle_func=is_request_type("LaunchRequest"))
 def launch_request_handler(handler_input):
 #@skill_builder.request_handler(can_handle_func=is_intent_name("LaunchNativeAppIntent"))
@@ -60,10 +61,16 @@ def launch_request_handler(handler_input):
 def cancel_and_stop_intent_handler(handler_input):
     """Single handler for Cancel and Stop Intent."""
     # type: (HandlerInput) -> Response
-    speech_text = templates['stop']
+#    speech_text = templates['stop']
 
-    return handler_input.response_builder.speak(speech_text).set_card(
-        SimpleCard(invocation_name, speech_text)).response
+#    return handler_input.response_builder.speak(speech_text).set_card(
+#        SimpleCard(invocation_name, speech_text)).response
+
+#    response_builder.add_directive(StopDirective()).set_should_end_session(True).response
+#    if text:
+#        response_builder.speak(text)
+
+    return handler_input.response_builder.add_directive(StopDirective()).set_should_end_session(True).response
 
 @skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.HelpIntent"))
 def help_intent_handler(handler_input):
@@ -74,78 +81,45 @@ def help_intent_handler(handler_input):
     return handler_input.response_builder.speak(speech_text).ask(
         speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
 
-@skill_builder.request_handler(can_handle_func=is_intent_name("SearchImmediatelyIntent"))
-def search_immediately_intent_handler(handler_input):
+@skill_builder.request_handler(can_handle_func=is_intent_name("SearchTitleArtistIntent"))
+def search_title_artist_intent_handler(handler_input):
     """Handler for Help Intent."""
     # type: (HandlerInput) -> Response
+    global playlist_string
 
-    global url
+    def return_spoken_answer(answer_text): # helper function that returns with a spoken statement
+        return handler_input.response_builder.speak(answer_text).ask(
+            answer_text).set_card(SimpleCard(invocation_name, answer_text)).response
 
-    title = handler_input.request_envelope.request.intent.slots['title'].value
-    artist = handler_input.request_envelope.request.intent.slots['artist'].value
+    title = handler_input.request_envelope.request.intent.slots['title'].value   # get song title from request
+    artist = handler_input.request_envelope.request.intent.slots['artist'].value # get artist name from request
 
-    if title==None or title == '':
-        speech_text = templates['title_not_provided']
+    if title==None or title == '': return return_spoken_answer(templates['title_not_provided'])
+    if artist==None or artist == '': return return_spoken_answer(templates['artist_not_provided'])
 
-        return handler_input.response_builder.speak(speech_text).ask(
-            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
-
-    if artist==None or artist == '':
-        speech_text = templates['artist_not_provided']
-
-        return handler_input.response_builder.speak(speech_text).ask(
-            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
-
-    logging.debug('SearchImmediatelyIntent(): title='+str(title)+', artist='+str(artist))
+    logging.debug('SearchTitleArtistIntent(): title='+str(title)+', artist='+str(artist))
     status, matched_title, matched_artist, title_url = query.query_artist_title(artist, title)
 
-    if status == -1:
-        speech_text = templates['artist_list_empty']
+    if status == -1: return return_spoken_answer(templates['artist_list_empty'])
+    if status == -2: return return_spoken_answer(templates['artist_not_found'])
+    if status == -3: return return_spoken_answer(templates['title_list_empty'])
+    if status == -4: return return_spoken_answer(templates['title_not_found'])
 
-        return handler_input.response_builder.speak(speech_text).ask(
-            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
+    assert status == 0, 'MinidlnaQueryHelper.query_artist_title() returned unexpected status'
 
-    if status == -2:
-        speech_text = templates['artist_not_found']
-
-        return handler_input.response_builder.speak(speech_text).ask(
-            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
-
-    if status == -3:
-        speech_text = templates['title_list_empty']
-
-        return handler_input.response_builder.speak(speech_text).ask(
-            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
-
-    if status == -4:
-        speech_text = templates['title_not_found']
-
-        return handler_input.response_builder.speak(speech_text).ask(
-            speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
-
-    assert status == 0
-
-#    speech_text = 'song gefunden!'
     logging.debug('SearchImmediatelyIntent(): matched_title='+str(matched_title)+', matched_artist='+str(matched_artist)+', url='+str(title_url))
-    url = title_url
-#    url = 'http://drogensong.de/dr.mp3'
-#    url='http://192.168.0.2:8200/MediaItems/2343.mp3'
+    playlist_string = title_url # save the url that the dlna server returned for the requested song
 
-#    return handler_input.response_builder.speak(speech_text).ask(
-#        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
     return handler_input.response_builder.add_directive(
-                PlayDirective(
-                    play_behavior=PlayBehavior.REPLACE_ALL,
-                    audio_item=AudioItem(
-                        stream=Stream(
-                            token='https://'+config['endpoint_domain']+'/playlist.m3u',
-                            url='https://'+config['endpoint_domain']+'/playlist.m3u',
-                            offset_in_milliseconds=0,
-                            expected_previous_token=None),
-                        metadata=None
-                    )
-                )
-            ).set_should_end_session(True).response
+             PlayDirective(
+                 play_behavior=PlayBehavior.REPLACE_ALL,
+                 audio_item=AudioItem(
+                  stream=Stream(
+                   token='https://'+config['endpoint_domain']+'/playlist.m3u', # amazon doesn't allow to play local http urls, but we can play a m3u
+                   url='https://'+config['endpoint_domain']+'/playlist.m3u',   # playlist that contains local http urls so we use this workaround
+                   offset_in_milliseconds=0,
+                   expected_previous_token=None),
+                  metadata=None))).set_should_end_session(True).response
 
 skill_adapter = SkillAdapter(
     skill=skill_builder.create(), skill_id=config['skill_id'], app=app)
@@ -159,10 +133,13 @@ def invoke_skill():
 @app.route("/playlist.m3u", methods=['GET'])
 def get_playlist():
     logging.debug('get_playlist()')
-    return Response('#EXTINF:-1, test\n'+url, mimetype='audio/x-mpegurl')
+    if playlist_string == None: # should never be true in normal use
+        logging.warn('received a playlist request before a song was queried, returning default jingle')
+        return Response('#EXTINF:-1, test\nhttps://www.musicscreen.org/MP3-OGG/Jingles/Tesla-Jingle.mp3', mimetype='audio/x-mpegurl')
+    else:
+        return Response('#EXTINF:-1, test\n'+playlist_string, mimetype='audio/x-mpegurl')
 
 
 
 if __name__ == '__main__':
-#    app.run(host='0.0.0.0', port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True) # ipv4
-    app.run(host='::', port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True) # ipv6
+    app.run(host=config['bind_ip_address'], port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True)
