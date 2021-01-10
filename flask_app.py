@@ -64,16 +64,6 @@ def navigate_home_intent_handler(handler_input):
     return handler_input.response_builder.speak(speech_text).ask(
         speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
 
-@skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.PauseIntent"))
-def pause_intent_handler(handler_input):
-    """Handler for Pause Intent."""
-    # type: (HandlerInput) -> Response
-    logging.debug('pause_intent_handler() called')
-    speech_text = templates['not_yet_implemented']
-
-    return handler_input.response_builder.speak(speech_text).ask(
-        speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
-
 @skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.ResumeIntent"))
 def resume_intent_handler(handler_input):
     """Handler for Resume Intent."""
@@ -87,6 +77,7 @@ def resume_intent_handler(handler_input):
 @skill_builder.request_handler(
     can_handle_func=lambda handler_input:
         is_intent_name("AMAZON.CancelIntent")(handler_input) or
+        is_intent_name("AMAZON.PauseIntent")(handler_input) or
         is_intent_name("AMAZON.StopIntent")(handler_input))
 def cancel_and_stop_intent_handler(handler_input):
     """Single handler for Cancel and Stop Intent."""
