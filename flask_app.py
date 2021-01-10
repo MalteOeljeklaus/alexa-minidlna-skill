@@ -6,7 +6,7 @@ from ask_sdk_core.skill_builder import SkillBuilder
 from flask_ask_sdk.skill_adapter import SkillAdapter
 from ask_sdk_core.utils import is_intent_name, is_request_type
 from ask_sdk_model.ui import SimpleCard
-from ask_sdk_model.interfaces.audioplayer import (PlayDirective, PlayBehavior, AudioItem, Stream)
+from ask_sdk_model.interfaces.audioplayer import (PlayDirective, PlayBehavior, StopDirective, AudioItem, Stream)
 
 from minidlna_query import MinidlnaQueryHelper
 
