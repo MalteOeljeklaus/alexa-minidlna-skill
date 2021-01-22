@@ -1,6 +1,5 @@
 import logging, yaml, upnpclient
 from xml.dom.minidom import parseString
-#import yaml
 
 from difflib import SequenceMatcher
 from operator import itemgetter
@@ -32,9 +31,9 @@ class MinidlnaQueryHelper:
             ret[title] = id
         return ret
     
-    def __get_object_url(self, ObjectID):
+    def __get_object_url(self, ObjectID, sort_criteria='+dc:title'):
         ret = {}
-        directo = parseString(self.upnpdev.ContentDirectory.Browse(ObjectID=str(ObjectID),BrowseFlag='BrowseDirectChildren',Filter='*',StartingIndex='0',RequestedCount='0',SortCriteria='+dc:title')['Result'])
+        directo = parseString(self.upnpdev.ContentDirectory.Browse(ObjectID=str(ObjectID),BrowseFlag='BrowseDirectChildren',Filter='*',StartingIndex='0',RequestedCount='0',SortCriteria=sort_criteria)['Result'])
         for c in directo.documentElement.childNodes[1:]:
             title = c.childNodes[0].childNodes[0].data
             url = None
@@ -55,7 +54,6 @@ class MinidlnaQueryHelper:
             return -1, '', '', ''
         similarities = [self.__string_similarity(artist.lower(), k.lower()) for k in artists.keys()]
         idx_max, simil_max = max(enumerate(similarities), key=itemgetter(1))
-#        print('\n\n\n'+str(list(artists.keys()))+'\n\n\n')
         logging.info('best matching artist is: ' + str(list(artists.keys())[idx_max]))       
         if simil_max<=self.config['similarity_threshold']:
             return -2, '', '', ''
@@ -73,3 +71,28 @@ class MinidlnaQueryHelper:
         title_url = titles[matched_title]
         return 0, matched_title, matched_artist, title_url
 
+    def query_artist_album(self, artist, album):
+        music_id = self.__get_object_children(0)['Music']
+        artist_id = self.__get_object_children(music_id)['Artist']
+        artists = self.__get_object_children(artist_id)
+        if len(artists)<=0:
+            return -1, '', '', ''
+        similarities = [self.__string_similarity(artist.lower(), k.lower()) for k in artists.keys()]
+        idx_max, simil_max = max(enumerate(similarities), key=itemgetter(1))
+        logging.info('best matching artist is: ' + str(list(artists.keys())[idx_max]))
+        if simil_max<=self.config['similarity_threshold']:
+            return -2, '', '', ''
+        matched_artist = list(artists.keys())[idx_max]
+        artist_id = artists[matched_artist]
+        albums = self.__get_object_children(artist_id)
+        if len(albums)<=0:
+            return -3, '', '', ''
+        similarities = [self.__string_similarity(album.lower(), k.lower()) for k in albums.keys()]
+        idx_max, simil_max = max(enumerate(similarities), key=itemgetter(1))
+        logging.info('best matching album is: ' + str(list(albums.keys())[idx_max]))
+        if simil_max<=self.config['similarity_threshold']:
+            return -4, '', '', ''
+        matched_album = list(albums.keys())[idx_max]
+        album_id = albums[matched_album]
+        titles = self.__get_object_url(album_id, sort_criteria='+upnp:class,+upnp:originalTrackNumber,+dc:title') # '+pv:numberOfThisDisc not supported, still works as intended for me?
+        return 0, matched_album, matched_artist, titles.values()

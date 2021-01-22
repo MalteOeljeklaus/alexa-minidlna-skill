@@ -40,6 +40,22 @@
                     ]
                 },
                 {
+                    "name": "SearchAlbumArtistIntent",
+                    "slots": [
+                        {
+                            "name": "artist",
+                            "type": "searchstring"
+                        },
+                        {
+                            "name": "album",
+                            "type": "searchstring"
+                        }
+                    ],
+                    "samples": [
+                        "spiele das album {album} von {artist}"
+                    ]
+                },
+                {
                     "name": "AMAZON.PauseIntent",
                     "samples": []
                 },
