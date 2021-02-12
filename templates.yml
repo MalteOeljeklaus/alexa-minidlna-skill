@@ -5,7 +5,7 @@ title_not_found: Dieser Songtitel konnte nicht gefunden werden.
 album_not_found: Dieser Albumtitel konnte nicht gefunden werden.
 artist_not_found: Dieser Künstler konnte nicht gefunden werden.
 title_not_provided: Den Songtitel habe ich nicht verstanden.
-title_not_provided: Den Albumtitel habe ich nicht verstanden.
+album_not_provided: Den Albumtitel habe ich nicht verstanden.
 artist_not_provided: Den Künstlernamen habe ich nicht verstanden.
 artist_list_empty: Die Liste der Künstlernamen auf dem DLNA Server ist leer.
 album_list_empty: Die Liste der Alben dieses Künstlers auf dem DLNA Server ist leer.
