@@ -6,7 +6,7 @@ This is a custom skill for Amazon Alexa devices that supports the playback of au
 ## How does it work?
 The skill is implemented as an external Alexa https endoint. It uses the alexa skill kit for python to host a flask webservice that the Alexa cloud can connect to and issue search and playback commands. The endpoint therefore needs to run in the same network as your NAS so that it can search your audio database. Also, the endpoint must be reachable from the internet for the Alexa cloud, so you need to expose it in your internet router. However this applies only for the search and playback commands, the actual audio streams can stay local if both your Alexa devices and your NAS are on the same network.
 
-Currently, you can playback single songs by asking for the artist name and the song title. Albums and playlists are not yet implemented.
+Currently, you can playback single songs or albums by asking for the artist name and the song title or album title. Custom playlists are not yet implemented, also you can't skip songs for now.
 
 ## How do I set it up?
 - setup minidlna/ReadyMedia on your NAS
@@ -20,10 +20,19 @@ Currently, you can playback single songs by asking for the artist name and the s
 - select endpoint from the developer console menu and set it to your endpoint domain
 - save and build your model, test with any song from your database
 
-## Sources
+## ToDo
+- Add voice commands to skip songs
+- Add support for playlists
+- Improve search strategy to find global best matches instead of matching artist name and song or album title independently
+- Support more alternative voice command variants
+- More testing, check compatibility with other DLNA servers and the DLNA standard
+- Improve documentation
 
+## Sources
 This skill was inspired by the following projects:
 
 https://gist.github.com/jamespo/0522d39eff41a5acc0491e1cd5e1d957
+
 https://github.com/LilaQ/Alexa-YouTube-Skill
+
 https://github.com/alexa/skill-sample-python-audio-player/blob/master/SingleStream/lambda/py/lambda_function.py

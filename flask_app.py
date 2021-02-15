@@ -119,8 +119,48 @@ def search_title_artist_intent_handler(handler_input):
 
     assert status == 0, 'MinidlnaQueryHelper.query_artist_title() returned unexpected status'
 
-    logging.debug('SearchImmediatelyIntent(): matched_title='+str(matched_title)+', matched_artist='+str(matched_artist)+', url='+str(title_url))
+    logging.debug('SearchTitleArtistIntent(): matched_title='+str(matched_title)+', matched_artist='+str(matched_artist)+', url='+str(title_url))
     playlist_string = title_url # save the url that the dlna server returned for the requested song
+
+    return handler_input.response_builder.add_directive(
+             PlayDirective(
+                 play_behavior=PlayBehavior.REPLACE_ALL,
+                 audio_item=AudioItem(
+                  stream=Stream(
+                   token='https://'+config['endpoint_domain']+'/playlist.m3u', # amazon doesn't allow to play local http urls, but we can play a m3u
+                   url='https://'+config['endpoint_domain']+'/playlist.m3u',   # playlist that contains local http urls so we use this workaround
+                   offset_in_milliseconds=0,
+                   expected_previous_token=None),
+                  metadata=None))).set_should_end_session(True).response
+
+@skill_builder.request_handler(can_handle_func=is_intent_name("SearchAlbumArtistIntent"))
+def search_album_artist_intent_handler(handler_input):
+    """Handler for Help Intent."""
+    # type: (HandlerInput) -> Response
+    global playlist_string
+
+    def return_spoken_answer(answer_text): # helper function that returns with a spoken statement
+        return handler_input.response_builder.speak(answer_text).ask(
+            answer_text).set_card(SimpleCard(invocation_name, answer_text)).response
+
+    album = handler_input.request_envelope.request.intent.slots['album'].value   # get song title from request
+    artist = handler_input.request_envelope.request.intent.slots['artist'].value # get artist name from request
+
+    if album==None or album == '': return return_spoken_answer(templates['album_not_provided'])
+    if artist==None or artist == '': return return_spoken_answer(templates['artist_not_provided'])
+
+    logging.debug('SearchAlbumArtistIntent(): album='+str(album)+', artist='+str(artist))
+    status, matched_album, matched_artist, title_urls = query.query_artist_album(artist, album)
+
+    if status == -1: return return_spoken_answer(templates['artist_list_empty'])
+    if status == -2: return return_spoken_answer(templates['artist_not_found'])
+    if status == -3: return return_spoken_answer(templates['album_list_empty'])
+    if status == -4: return return_spoken_answer(templates['album_not_found'])
+
+    assert status == 0, 'MinidlnaQueryHelper.query_artist_album() returned unexpected status'
+
+    logging.debug('SearchAlbumArtistIntent(): matched_album='+str(matched_album)+', matched_artist='+str(matched_artist)+', urls='+str(title_urls))
+    playlist_string = '\n'.join(title_urls) # save the urls that the dlna server returned for the requested album
 
     return handler_input.response_builder.add_directive(
              PlayDirective(
