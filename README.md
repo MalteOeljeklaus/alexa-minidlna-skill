@@ -13,7 +13,7 @@ Currently, you can playback single songs or albums by asking for the artist name
 - adjust intents.json and template.yml for your preferred language (the preset voice commands are in German).
 - adjust config.yml for your local network setup, read up on how to configure SSL [here](https://developer.amazon.com/de-DE/docs/alexa/custom-skills/host-a-custom-skill-as-a-web-service.html#about-ssl-options), use any dyndns service to setup your endpoint domain and configure your router to forward https connections
 - run: `pip install -r requirements.txt`
-- run: `python3 flask_app.py`
+- run: `python3 flask_app.py` (this might be insecure, use only for development purposes, do not run as root)
 - go to your [Alexa developer console](https://developer.amazon.com/alexa/console/ask) and create a new skill
 - copy & paste intents.json into the json editor of your interaction model
 - select interfaces from the developer console menu and enable audio player
@@ -27,6 +27,7 @@ Currently, you can playback single songs or albums by asking for the artist name
 - Support more alternative voice command variants
 - More testing, check compatibility with other DLNA servers and the DLNA standard
 - Improve documentation
+- Add scripts to launch a secure production server
 
 ## Sources
 This skill was inspired by the following projects:

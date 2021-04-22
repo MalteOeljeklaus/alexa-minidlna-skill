@@ -192,4 +192,4 @@ def get_playlist():
         return Response('#EXTINF:-1, test\n'+playlist_string, mimetype='audio/x-mpegurl')
 
 if __name__ == '__main__':
-    app.run(host=config['bind_ip_address'], port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=True)
+    app.run(host=config['bind_ip_address'], port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=False)
