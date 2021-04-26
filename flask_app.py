@@ -64,7 +64,17 @@ def navigate_home_intent_handler(handler_input):
     return handler_input.response_builder.speak(speech_text).ask(
         speech_text).set_card(SimpleCard(invocation_name, speech_text)).response
 
-@skill_builder.request_handler(can_handle_func=is_intent_name("AMAZON.ResumeIntent"))
+@skill_builder.request_handler(
+    can_handle_func=lambda handler_input:
+        is_intent_name("AMAZON.ResumeIntent")(handler_input) or
+        is_intent_name("AMAZON.LoopOffIntent")(handler_input) or
+        is_intent_name("AMAZON.LoopOnIntent")(handler_input) or
+        is_intent_name("AMAZON.NextIntent")(handler_input) or
+        is_intent_name("AMAZON.PreviousIntent")(handler_input) or
+        is_intent_name("AMAZON.RepeatIntent")(handler_input) or
+        is_intent_name("AMAZON.ShuffleOffIntent")(handler_input) or
+        is_intent_name("AMAZON.ShuffleOnIntent")(handler_input) or
+        is_intent_name("AMAZON.StartOverIntent")(handler_input))
 def resume_intent_handler(handler_input):
     """Handler for Resume Intent."""
     # type: (HandlerInput) -> Response
