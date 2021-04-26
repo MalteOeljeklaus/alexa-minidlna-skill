@@ -197,9 +197,9 @@ def get_playlist():
     logging.debug('get_playlist()')
     if playlist_string == None: # should never be true in normal use
         logging.warn('received a playlist request before a song was queried, returning default jingle')
-        return Response('#EXTINF:-1, test\nhttps://www.musicscreen.org/MP3-OGG/Jingles/Tesla-Jingle.mp3', mimetype='audio/x-mpegurl')
+        return Response('https://www.musicscreen.org/MP3-OGG/Jingles/Tesla-Jingle.mp3', mimetype='audio/x-mpegurl')
     else:
-        return Response('#EXTINF:-1, test\n'+playlist_string, mimetype='audio/x-mpegurl')
+        return Response('playlist_string, mimetype='audio/x-mpegurl')
 
 if __name__ == '__main__':
     app.run(host=config['bind_ip_address'], port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=False)
