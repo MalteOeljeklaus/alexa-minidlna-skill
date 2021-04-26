@@ -119,7 +119,7 @@ def search_title_artist_intent_handler(handler_input):
     if title==None or title == '': return return_spoken_answer(templates['title_not_provided'])
     if artist==None or artist == '': return return_spoken_answer(templates['artist_not_provided'])
 
-    logging.debug('SearchTitleArtistIntent(): title='+str(title)+', artist='+str(artist))
+    logging.info('SearchTitleArtistIntent(): title='+str(title)+', artist='+str(artist))
     status, matched_title, matched_artist, title_url = query.query_artist_title(artist, title)
 
     if status == -1: return return_spoken_answer(templates['artist_list_empty'])
@@ -129,7 +129,7 @@ def search_title_artist_intent_handler(handler_input):
 
     assert status == 0, 'MinidlnaQueryHelper.query_artist_title() returned unexpected status'
 
-    logging.debug('SearchTitleArtistIntent(): matched_title='+str(matched_title)+', matched_artist='+str(matched_artist)+', url='+str(title_url))
+    logging.info('SearchTitleArtistIntent(): matched_title='+str(matched_title)+', matched_artist='+str(matched_artist)+', url='+str(title_url))
     playlist_string = title_url # save the url that the dlna server returned for the requested song
 
     return handler_input.response_builder.add_directive(
@@ -159,7 +159,7 @@ def search_album_artist_intent_handler(handler_input):
     if album==None or album == '': return return_spoken_answer(templates['album_not_provided'])
     if artist==None or artist == '': return return_spoken_answer(templates['artist_not_provided'])
 
-    logging.debug('SearchAlbumArtistIntent(): album='+str(album)+', artist='+str(artist))
+    logging.info('SearchAlbumArtistIntent(): album='+str(album)+', artist='+str(artist))
     status, matched_album, matched_artist, title_urls = query.query_artist_album(artist, album)
 
     if status == -1: return return_spoken_answer(templates['artist_list_empty'])
@@ -169,7 +169,7 @@ def search_album_artist_intent_handler(handler_input):
 
     assert status == 0, 'MinidlnaQueryHelper.query_artist_album() returned unexpected status'
 
-    logging.debug('SearchAlbumArtistIntent(): matched_album='+str(matched_album)+', matched_artist='+str(matched_artist)+', urls='+str(title_urls))
+    logging.info('SearchAlbumArtistIntent(): matched_album='+str(matched_album)+', matched_artist='+str(matched_artist)+', urls='+str(title_urls))
     playlist_string = '\n'.join(title_urls) # save the urls that the dlna server returned for the requested album
 
     return handler_input.response_builder.add_directive(
@@ -199,7 +199,7 @@ def get_playlist():
         logging.warn('received a playlist request before a song was queried, returning default jingle')
         return Response('https://www.musicscreen.org/MP3-OGG/Jingles/Tesla-Jingle.mp3', mimetype='audio/x-mpegurl')
     else:
-        return Response('playlist_string, mimetype='audio/x-mpegurl')
+        return Response(playlist_string, mimetype='audio/x-mpegurl')
 
 if __name__ == '__main__':
     app.run(host=config['bind_ip_address'], port=config['port'], ssl_context= (config['ssl_certificate'], config['ssl_private_key']), debug=False)
